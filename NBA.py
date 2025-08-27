@@ -1,6 +1,7 @@
 # ==============================
 # Libraries
 # ==============================
+# Loading libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,17 +17,17 @@ from sklearn.pipeline import make_pipeline
 player_scoring_rs = pd.read_csv("player_stats_traditional_rs.csv")
 player_scoring_post = pd.read_csv("player_stats_traditional_po.csv")
 
-# Merge datasets
+# Merging/joining datasets by player_id and season
 df = pd.merge(player_scoring_post, player_scoring_rs,
               on=["PLAYER_ID", "SEASON"], how="left",
               suffixes=("_po", "_rs"))
 
-# Clean columns
+# Cleaning Columns
 df.columns = df.columns.str.lower()
 df["age_rs"] = df["age_rs"].fillna(0).astype(int)
 df["age_po"] = df["age_po"].fillna(0).astype(int)
 
-# Select relevant columns
+# Selecting relevant columns for models
 selected_columns = [
     "player_id", "player_name_po", "team_id_po", "team_id_rs",
     "age_po", "age_rs", "fg_pct_rs", "fg_pct_po",
@@ -41,8 +42,38 @@ df = df[selected_columns]
 # ==============================
 # Exploratory Data Analysis
 # ==============================
+df = df.dropna(subset=['pts_rs', 'pts_po'])
+
+# Compute five-number summary for regular and post season points
+five_num_rs = df['pts_rs'].describe()[['min', '25%', '50%', '75%', 'max']]
+five_num_po = df['pts_po'].describe()[['min', '25%', '50%', '75%', 'max']]
+
+# Combine into a single table
+five_num_table = pd.DataFrame({
+    'Regular Season': five_num_rs,
+    'Playoffs': five_num_po
+})
+
+# Rename the index for clarity
+five_num_table.index = ['Min', 'Q1', 'Median', 'Q3', 'Max']
+
+print(five_num_table)
+
+plt.figure(figsize=(10, 6))
+
+# Boxplot for both regular season and playoff points
+plt.boxplot([df['pts_rs'], df['pts_po']], labels=['Regular Season', 'Playoffs'],
+            patch_artist=True,
+            boxprops=dict(facecolor='skyblue'),
+            medianprops=dict(color='red'))
+
+plt.ylabel('Points')
+plt.title('Distribution of Points: Regular Season vs Playoffs')
+plt.show()
+
 avg_pts_rs = df.groupby("age_rs")["pts_rs"].mean().reset_index()
 avg_pts_po = df.groupby("age_po")["pts_po"].mean().reset_index()
+
 
 plt.figure(figsize=(10,6))
 plt.plot(avg_pts_rs["age_rs"], avg_pts_rs["pts_rs"], marker='o', label="Regular Season")
@@ -50,20 +81,6 @@ plt.plot(avg_pts_po["age_po"], avg_pts_po["pts_po"], marker='s', label="Postseas
 plt.title("Average Points per Game by Age")
 plt.xlabel("Age")
 plt.ylabel("Average Points per Game")
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.show()
-
-average_fg_rs = df.groupby("age_rs")["fg_pct_rs"].mean().reset_index()
-average_fg_po = df.groupby("age_po")["fg_pct_po"].mean().reset_index()
-
-plt.figure(figsize=(10,6))
-plt.plot(average_fg_rs["age_rs"], average_fg_rs["fg_pct_rs"]*100, marker='o', label="Regular Season")
-plt.plot(average_fg_po["age_po"], average_fg_po["fg_pct_po"]*100, marker='s', label="Postseason")
-plt.title("Average Field Goal Percentage by Age")
-plt.xlabel("Age")
-plt.ylabel("Average Field Goal Percentage (%)")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
