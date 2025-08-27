@@ -11,17 +11,32 @@ df.columns = df.columns.str.lower()
 df["age_rs"] = df["age_rs"].fillna(0).astype(int)
 df["age_po"] = df["age_po"].fillna(0).astype(int)
 
-selected_columns = ["player_id", "player_name_po", "team_id_po", "team_id_rs", "age_po", "fg_pct_rs", "fg_pct_po", "fg3_pct_po", "fg3_pct_rs", "pts_po", "pts_rs", "plus_minus_rs", "plus_minus_po", "season"]
+selected_columns = ["player_id", "player_name_po", "team_id_po", "team_id_rs", "age_po", "age_rs", "fg_pct_rs", "fg_pct_po", "fg3_pct_po", "fg3_pct_rs", "pts_po", "pts_rs", "plus_minus_rs", "plus_minus_po", "season"]
 df = df[selected_columns]
-
-avg_pts_rs = df.groupby("age_po")["pts_rs"].mean().reset_index()
+avg_pts_rs = df.groupby("age_rs")["pts_rs"].mean().reset_index()
 avg_pts_po = df.groupby("age_po")["pts_po"].mean().reset_index()
+
 plt.figure(figsize=(10,6))
-plt.plot(avg_pts_rs["age_po"], avg_pts_rs["pts_rs"], marker='o', label="Regular Season")
+plt.plot(avg_pts_rs["age_rs"], avg_pts_rs["pts_rs"], marker='o', label="Regular Season")
 plt.plot(avg_pts_po["age_po"], avg_pts_po["pts_po"], marker='s', label="Postseason")
 plt.title("Average Points per Game by Age")
 plt.xlabel("Age")
 plt.ylabel("Average Points per Game")
 plt.legend()
 plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+average_fg_rs = df.groupby("age_rs")["fg_pct_rs"].mean().reset_index()
+average_fg_po = df.groupby("age_po")["fg_pct_po"].mean().reset_index()
+
+plt.figure(figsize=(10,6))
+plt.plot(average_fg_rs["age_rs"], average_fg_rs["fg_pct_rs"]*100, marker='o', label="Regular Season")
+plt.plot(average_fg_po["age_po"], average_fg_po["fg_pct_po"]*100, marker='s', label="Postseason")
+plt.title("Average Field Goal Percentage by Age")
+plt.xlabel("Age")
+plt.ylabel("Average Field Goal Percentage (%)")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
 plt.show()
