@@ -11,11 +11,8 @@ df.columns = df.columns.str.lower()
 df["age_rs"] = df["age_rs"].fillna(0).astype(int)
 df["age_po"] = df["age_po"].fillna(0).astype(int)
 
-
-print(df.columns)
 selected_columns = ["player_id", "player_name_po", "team_id_po", "team_id_rs", "age_po", "fg_pct_rs", "fg_pct_po", "fg3_pct_po", "fg3_pct_rs", "pts_po", "pts_rs", "plus_minus_rs", "plus_minus_po", "season"]
 df = df[selected_columns]
-print(df.head(10))
 
 avg_pts_rs = df.groupby("age_po")["pts_rs"].mean().reset_index()
 avg_pts_po = df.groupby("age_po")["pts_po"].mean().reset_index()
