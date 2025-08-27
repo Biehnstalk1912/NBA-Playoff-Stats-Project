@@ -1,0 +1,2 @@
+SELECT player_id
+FROM common_player_info
